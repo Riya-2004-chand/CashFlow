@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceIQ - Register</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2d3748;
+        }
+
+        .register-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .register-container h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .register-container p {
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff5f5;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .success-message {
+            background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+            color: #22543d;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            border-left: 5px solid #38a169;
+            display: none;
+        }
+
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .register-container {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .register-container h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <h1>💰 FinanceIQ</h1>
+        <p>Create your account</p>
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+        <form id="registerForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter username (letters, numbers, underscores)" maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password (min 6 characters)" maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input type="password" id="confirmPassword" required placeholder="Confirm password" maxlength="50">
+            </div>
+            <button type="submit" class="btn" id="registerBtn">Register</button>
+        </form>
+        <p style="margin-top: 20px;">
+            Already have an account? <a href="login.html" class="link">Log in here</a>
+        </p>
+    </div>
+
+    <script>
+        // Check if LocalStorage is available
+        function isLocalStorageAvailable() {
+            try {
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                console.log('✅ LocalStorage is available');
+                return true;
+            } catch (e) {
+                console.error('❌ LocalStorage is not available:', e);
+                return false;
+            }
+        }
+
+        // Initialize register form
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Register page loaded');
+            const registerForm = document.getElementById('registerForm');
+            const registerBtn = document.getElementById('registerBtn');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            if (!registerForm || !registerBtn || !errorMessage || !successMessage) {
+                console.error('❌ Form elements not found:', {
+                    registerForm: !!registerForm,
+                    registerBtn: !!registerBtn,
+                    errorMessage: !!errorMessage,
+                    successMessage: !!successMessage
+                });
+                alert('Error: Form initialization failed. Please refresh the page.');
+                return;
+            }
+
+            if (!isLocalStorageAvailable()) {
+                showError('LocalStorage is not available. Please enable it or use a different browser.');
+                registerBtn.disabled = true;
+                return;
+            }
+
+            registerForm.addEventListener('submit', handleRegister);
+            console.log('✅ Form submit listener attached');
+
+            // Focus on username field
+            document.getElementById('username').focus();
+        });
+
+        function handleRegister(e) {
+            e.preventDefault();
+            console.log('📝 Register form submitted');
+
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = true;
+            registerBtn.classList.add('loading');
+            registerBtn.textContent = 'Registering...';
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            console.log('📋 Form data:', { username, password, confirmPassword });
+
+            // Validation
+            if (!username || !password || !confirmPassword) {
+                showError('Please fill in all fields');
+                console.warn('⚠️ Validation failed: Missing fields');
+                resetButton();
+                return;
+            }
+
+            // Username validation: alphanumeric and underscores only
+            const usernameRegex = /^[a-zA-Z0-9_]+$/;
+            if (!usernameRegex.test(username)) {
+                showError('Username must contain only letters, numbers, or underscores');
+                console.warn('⚠️ Validation failed: Invalid username format');
+                resetButton();
+                return;
+            }
+
+            if (username.length < 3) {
+                showError('Username must be at least 3 characters');
+                console.warn('⚠️ Validation failed: Username too short');
+                resetButton();
+                return;
+            }
+
+            if (password.length < 6) {
+                showError('Password must be at least 6 characters');
+                console.warn('⚠️ Validation failed: Password too short');
+                resetButton();
+                return;
+            }
+
+            if (password !== confirmPassword) {
+                showError('Passwords do not match');
+                console.warn('⚠️ Validation failed: Passwords do not match');
+                resetButton();
+                return;
+            }
+
+            // Check if username exists
+            let users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (users[username]) {
+                showError('Username already exists');
+                console.warn('⚠️ Validation failed: Username exists');
+                resetButton();
+                return;
+            }
+
+            // Save user
+            try {
+                users[username] = { password: password, expenses: [] };
+                localStorage.setItem('users', JSON.stringify(users));
+                console.log('✅ User registered:', username);
+                showSuccess('Registration successful! Redirecting to login...');
+                setTimeout(() => {
+                    try {
+                        window.location.href = 'login.html';
+                        console.log('✅ Redirecting to login.html');
+                    } catch (e) {
+                        console.error('❌ Redirect failed:', e);
+                        showError('Redirect failed. Please click the login link below.');
+                        resetButton();
+                    }
+                }, 2000);
+            } catch (e) {
+                console.error('❌ Error saving user:', e);
+                showError('Error saving user. Please try again.');
+                resetButton();
+            }
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            document.getElementById('successMessage').style.display = 'none';
+            console.log('🚨 Error displayed:', message);
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successMessage = document.getElementById('successMessage');
+            successMessage.textContent = message;
+            successMessage.style.display = 'block';
+            document.getElementById('errorMessage').style.display = 'none';
+            console.log('✅ Success displayed:', message);
+        }
+
+        function resetButton() {
+            const registerBtn = document.getElementById('registerBtn');
+            registerBtn.disabled = false;
+            registerBtn.classList.remove('loading');
+            registerBtn.textContent = 'Register';
+        }
+    </script>
+</body>
+</html>

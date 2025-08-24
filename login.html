@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FinanceIQ - Login</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #2d3748;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 40px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .login-container h1 {
+            font-size: 2.5em;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .login-container p {
+            font-size: 1.1em;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #4a5568;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            position: relative;
+        }
+
+        .btn:disabled {
+            background: #a0aec0;
+            cursor: not-allowed;
+        }
+
+        .btn.loading::after {
+            content: '';
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .error-message {
+            color: #e53e3e;
+            font-size: 0.9em;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #fff5f5;
+            border-radius: 5px;
+            display: none;
+        }
+
+        .link {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 500px) {
+            .login-container {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .login-container h1 {
+                font-size: 2em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>💰 FinanceIQ</h1>
+        <p>Log in to your account</p>
+        <div id="errorMessage" class="error-message"></div>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" required placeholder="Enter username" maxlength="50">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" required placeholder="Enter password" maxlength="50">
+            </div>
+            <button type="submit" class="btn" id="loginBtn">Log In</button>
+        </form>
+        <p style="margin-top: 20px;">
+            Don't have an account? <a href="register.html" class="link">Register here</a>
+        </p>
+    </div>
+
+    <script>
+        // Check if LocalStorage is available
+        function isLocalStorageAvailable() {
+            try {
+                const test = 'test';
+                localStorage.setItem(test, test);
+                localStorage.removeItem(test);
+                console.log('✅ LocalStorage is available');
+                return true;
+            } catch (e) {
+                console.error('❌ LocalStorage is not available:', e);
+                return false;
+            }
+        }
+
+        // Initialize login form
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 Login page loaded');
+            const loginForm = document.getElementById('loginForm');
+            const loginBtn = document.getElementById('loginBtn');
+            const errorMessage = document.getElementById('errorMessage');
+
+            if (!loginForm || !loginBtn || !errorMessage) {
+                console.error('❌ Form elements not found:', {
+                    loginForm: !!loginForm,
+                    loginBtn: !!loginBtn,
+                    errorMessage: !!errorMessage
+                });
+                alert('Error: Form initialization failed. Please refresh the page.');
+                return;
+            }
+
+            if (!isLocalStorageAvailable()) {
+                showError('LocalStorage is not available. Please enable it or use a different browser.');
+                loginBtn.disabled = true;
+                return;
+            }
+
+            loginForm.addEventListener('submit', handleLogin);
+            console.log('✅ Form submit listener attached');
+
+            // Focus on username field
+            document.getElementById('username').focus();
+        });
+
+        function handleLogin(e) {
+            e.preventDefault();
+            console.log('📝 Login form submitted');
+
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = true;
+            loginBtn.classList.add('loading');
+            loginBtn.textContent = 'Logging in...';
+
+            const username = document.getElementById('username').value.trim();
+            const password = document.getElementById('password').value;
+
+            console.log('📋 Form data:', { username, password });
+
+            // Basic validation
+            if (!username || !password) {
+                showError('Please fill in all fields');
+                console.warn('⚠️ Validation failed: Missing fields');
+                resetButton();
+                return;
+            }
+
+            // Check credentials in LocalStorage
+            const users = JSON.parse(localStorage.getItem('users') || '{}');
+            if (users[username] && users[username].password === password) {
+                // Set session
+                localStorage.setItem('currentUser', username);
+                localStorage.setItem('sessionToken', Date.now().toString());
+                console.log('✅ Login successful for:', username);
+                setTimeout(() => {
+                    try {
+                        window.location.href = 'index.html';
+                        console.log('✅ Redirecting to index.html');
+                    } catch (e) {
+                        console.error('❌ Redirect failed:', e);
+                        showError('Redirect failed. Please try logging in again.');
+                        resetButton();
+                    }
+                }, 1000);
+            } else {
+                showError('Invalid username or password');
+                console.warn('⚠️ Validation failed: Invalid credentials');
+                resetButton();
+            }
+        }
+
+        function showError(message) {
+            const errorMessage = document.getElementById('errorMessage');
+            errorMessage.textContent = message;
+            errorMessage.style.display = 'block';
+            console.log('🚨 Error displayed:', message);
+            setTimeout(() => {
+                errorMessage.style.display = 'none';
+            }, 5000);
+        }
+
+        function resetButton() {
+            const loginBtn = document.getElementById('loginBtn');
+            loginBtn.disabled = false;
+            loginBtn.classList.remove('loading');
+            loginBtn.textContent = 'Log In';
+        }
+    </script>
+</body>
+</html>
